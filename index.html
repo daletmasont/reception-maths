@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Number Stars">
-<meta name="app-version" content="2026.11.17b">
+<meta name="app-version" content="2026.11.17c">
 <meta name="theme-color" content="#bfe9ff">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>Number Stars</title>
@@ -1026,7 +1026,7 @@ function renderParent(){
     '<div class="card"><h3>' + esc(p.avatar + " " + p.name) + '</h3>' +
       '<div class="set"><label>Stars now</label><span style="font-size:22px;font-weight:900">⭐ ' + p.stars + '</span></div>' +
       '<div class="set"><label>Stars ever · games played</label><span>' + p.lifetime + " · " + p.rounds + "</span></div>" +
-      '<div class="row" style="margin-top:6px"><button class="btn sm ghost" data-edit="1">✏️ Name &amp; picture</button><button class="btn sm ghost" data-adj="-5">−5 ⭐</button><button class="btn sm ghost" data-adj="5">+5 ⭐</button><button class="btn sm red" data-del="1">Remove</button></div></div>' +
+      '<div class="row" style="margin-top:6px"><button class="btn sm ghost" data-edit="1">✏️ Name &amp; picture</button><button class="btn sm ghost" data-adj="-5">−5 ⭐</button><button class="btn sm ghost" data-adj="5">+5 ⭐</button><button class="btn sm ghost" data-reset="1">↺ Reset</button><button class="btn sm red" data-del="1">Remove</button></div></div>' +
     '<div class="card"><h3>🏆 Reward</h3>' +
       '<div class="set"><label>Reward is on</label>' + tog("rewardsOn", st.rewardsOn) + "</div>" +
       '<div class="set"><label>Stars needed</label>' + stepper("goal", st.goal) + "</div>" +
@@ -1155,6 +1155,14 @@ document.addEventListener("click", e => {
     return;
   }
   if (t.closest("[data-edit]") && p){ playerDialog("Change name or picture", "Save", p.name, p.avatar, (name, avatar) => { p.name = name; p.avatar = avatar; F.roster[p.id] = Object.assign(F.roster[p.id] || {}, { name, avatar, u: now() }); savePlayer(p); saveFamily(); renderParent(); }); return; }
+  if (t.closest("[data-reset]") && p){
+    message("↺", "Reset " + p.name + "?", "Stars only: the star jar goes back to 0 and the family board clears.\nStart fresh: also clears stickers, levels and progress, like a brand new player.", [
+      ["Cancel", "ghost"],
+      ["Stars only", "purple", () => { p.stars = 0; p.lifetime = 0; p.goalShown = 0; for (const k in p.daily) p.daily[k].s = 0; savePlayer(p); renderParent(); }],
+      ["Start fresh", "red", () => { const keep = { id: p.id, name: p.name, avatar: p.avatar, settings: p.settings }; const np = merge(DEFP(), JSON.parse(JSON.stringify(keep))); PL[p.id] = np; if (S && S.id === p.id) S = np; savePlayer(np); renderParent(); }]
+    ]);
+    return;
+  }
   if (t.closest("[data-del]") && p){
     message("🗑️", "Remove " + p.name + "?", "Their stars, stickers and progress will be removed from every device.", [["Cancel", "ghost"], ["Remove", "red", () => { F.roster[p.id].deleted = true; F.roster[p.id].u = now(); if (S && S.id === p.id){ S = null; lsSet(LS_CUR, null); } PP = null; saveFamily(); renderParent(); }]]);
     return;
