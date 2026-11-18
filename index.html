@@ -6,9 +6,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Number Stars">
-<meta name="app-version" content="2026.11.17c">
+<meta name="app-version" content="2026.11.18a">
 <meta name="theme-color" content="#bfe9ff">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-512.png">
 <title>Number Stars</title>
 <style>
 :root{
@@ -168,6 +169,10 @@ h2{font-size:clamp(22px,4vw,32px);margin:8px 0}
 .album{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:10px}
 .album div{aspect-ratio:1;background:#fff;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:44px;box-shadow:0 4px 0 rgba(43,35,80,.08);position:relative}
 .album div.no{background:#ece8f7;filter:grayscale(1);opacity:.35}
+.apage{background:rgba(255,255,255,.55);border-radius:24px;padding:12px;margin-bottom:14px}
+.apage.done{background:linear-gradient(135deg,#fff6c9,#ffe0f0);box-shadow:0 0 0 3px var(--yellow)}
+.apage h3{margin:0 0 10px;font-size:22px;display:flex;align-items:center;gap:8px}
+.apage h3 span{margin-left:auto;font-size:16px;color:var(--soft)}
 .album div small{position:absolute;bottom:4px;right:8px;font-size:13px;font-weight:900;color:var(--purple)}
 
 /* board */
@@ -292,7 +297,7 @@ table.prog2 td:first-child{font-size:24px;width:34px}
 <section class="screen" id="album"><div class="wrap">
   <div class="top"><button class="icon" data-go="home">🏠</button><h2 style="flex:1;text-align:center">My sticker book</h2><span class="icon" style="visibility:hidden"></span></div>
   <p class="sub" id="albumSub"></p>
-  <div class="album" id="albumGrid"></div>
+  <div id="albumGrid"></div>
 </div></section>
 
 <!-- BOARD -->
@@ -331,7 +336,20 @@ const CLOUD = {
 const LS_FAM = "ns1_family", LS_PL = "ns1_players", LS_CUR = "ns1_current", LS_MUTE = "ns1_muted";
 const CODE_KEY = "ns_family_code";
 const AVATARS = ["🦄","🐶","🐱","🐰","🐻","🐼","🐯","🦁","🐸","🐵","🐧","🦖","🐙","🦋","🐞","🐝","🚀","🚒","🚂","🦕","🧸","🌈","⭐","👑"];
-const STICKERS = ["🦄","🐶","🐱","🐰","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🐔","🐧","🐦","🦉","🦋","🐞","🐝","🐢","🐙","🦀","🐠","🐬","🐳","🦖","🦕","🌈","☀️","🌙","⭐","🌸","🌻","🍓","🍉","🍌","🍩","🧁","🍭","🚀","🚂","🚒","🚜","🎈","🎁","👑","💎"];
+const PAGES = [
+  { em: "🐾", name: "Pets & farm", list: "🐶 🐱 🐰 🐹 🐭 🐮 🐷 🐔 🐴 🐑 🐐 🦆 🦃 🐥 🐿️ 🦔".split(" ") },
+  { em: "🦁", name: "Wild animals", list: "🦁 🐯 🐻 🐼 🐨 🐵 🦊 🐺 🦒 🐘 🦓 🦛 🦏 🐊 🦘 🦥".split(" ") },
+  { em: "🌊", name: "Under the sea", list: "🐠 🐟 🐡 🐬 🐳 🐋 🦈 🐙 🦑 🦀 🦞 🦐 🐚 🐢 🦭 🪼".split(" ") },
+  { em: "🐞", name: "Bugs & birds", list: "🦋 🐞 🐝 🐛 🐌 🐜 🕷️ 🦗 🐸 🦉 🐦 🐧 🦜 🦩 🦚 🦢".split(" ") },
+  { em: "🦖", name: "Dinos, space & magic", list: "🦖 🦕 🐉 🦄 🧚 🧙 👻 🤖 👽 👾 🚀 🛸 🪐 🌍 ☄️ 🌙".split(" ") },
+  { em: "🍓", name: "Yummy food", list: "🍓 🍉 🍌 🍎 🍊 🍇 🍒 🍍 🥝 🥕 🌽 🍕 🍔 🍟 🍪 🥨".split(" ") },
+  { em: "🚂", name: "Things that go", list: "🚂 🚒 🚜 🚗 🚕 🚌 🚓 🚑 🏎️ 🚲 🛴 🚁 ✈️ ⛵ 🚤 🛻".split(" ") },
+  { em: "🌈", name: "Sky & nature", list: "🌈 ☀️ ⭐ 🌸 🌻 🌷 🌹 🍄 🌵 🌳 🍁 ❄️ ⛄ 🔥 ⚡ 🌊".split(" ") },
+  { em: "🎉", name: "Party & treats", list: "🎈 🎁 👑 💎 🍩 🧁 🍭 🍦 🎂 🍫 🍬 🎉 🎀 🧸 🪀 🎨".split(" ") }
+];
+const STICKERS = PAGES.flatMap(p => p.list);
+const pageOf = x => PAGES.find(p => p.list.includes(x));
+const pageDone = (p, pg) => pg.list.every(x => p.stickers[x]);
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const now = () => Date.now();
@@ -929,9 +947,13 @@ function endRound(){
   S.sessions.push({ t: now(), skill: Q.skill, c: Q.correct, n: ROUND }); if (S.sessions.length > 80) S.sessions.shift();
   // sticker for finishing a round
   const missing = STICKERS.filter(x => !S.stickers[x]);
-  const st = missing.length ? pick(missing) : pick(STICKERS);
+  const curPage = PAGES.find(pg => !pageDone(S, pg));
+  const pageMissing = curPage ? curPage.list.filter(x => !S.stickers[x]) : [];
+  const st = pageMissing.length && Math.random() < .7 ? pick(pageMissing) : missing.length ? pick(missing) : pick(STICKERS);
   S.stickers[st] = (S.stickers[st] || 0) + 1;
   const isNew = S.stickers[st] === 1;
+  const finishedPage = isNew && pageDone(S, pageOf(st)) ? pageOf(st) : null;
+  if (finishedPage){ S.stars += 3; S.lifetime += 3; d.s += 3; }
   const ups = Q.levelUps.slice(), skill = Q.skill;
   Q = null;
   save(true);
@@ -939,7 +961,8 @@ function endRound(){
   $("#resTitle").textContent = perfect ? "Perfect! 🎉" : earned >= 3 ? "Brilliant!" : "Well done!";
   $("#resStars").innerHTML = [...Array(earned)].map((_, i) => '<span style="animation-delay:' + (i * .15) + 's">⭐</span>').join("") || "💪";
   $("#resSub").textContent = "You got " + earned + " star" + (earned === 1 ? "" : "s") + (bonus ? " (with a bonus star for a perfect round!)" : "!");
-  $("#resBanner").innerHTML = ups.length ? '<div class="banner">🚀 Level up! ' + ups.map(k => SK[k].em + " " + SK[k].name).join(", ") + "</div>" : "";
+  $("#resBanner").innerHTML = (ups.length ? '<div class="banner">🚀 Level up! ' + ups.map(k => SK[k].em + " " + SK[k].name).join(", ") + "</div>" : "");
+  $("#sticker").dataset.page = finishedPage ? finishedPage.name : "";
   $("#sticker").classList.remove("flip");
   $("#stickerEm").textContent = st;
   $("#stickerTxt").textContent = "You earned a sticker!";
@@ -989,8 +1012,12 @@ function renderHome(){
 }
 function renderAlbum(){
   const got = STICKERS.filter(x => S.stickers[x]).length;
-  $("#albumSub").textContent = got + " of " + STICKERS.length + " stickers. Finish a game to win one!";
-  $("#albumGrid").innerHTML = STICKERS.map(x => S.stickers[x] ? "<div>" + x + (S.stickers[x] > 1 ? "<small>×" + S.stickers[x] + "</small>" : "") + "</div>" : '<div class="no">' + x + "</div>").join("");
+  $("#albumSub").textContent = got + " of " + STICKERS.length + " stickers. Finish a game to win one! Fill a page for 3 bonus stars.";
+  $("#albumGrid").innerHTML = PAGES.map(pg => {
+    const have = pg.list.filter(x => S.stickers[x]).length, done = have === pg.list.length;
+    return '<div class="apage' + (done ? " done" : "") + '"><h3>' + pg.em + " " + pg.name + "<span>" + (done ? "⭐ Complete!" : have + " / " + pg.list.length) + '</span></h3><div class="album">' +
+      pg.list.map(x => S.stickers[x] ? "<div>" + x + (S.stickers[x] > 1 ? "<small>×" + S.stickers[x] + "</small>" : "") + "</div>" : '<div class="no">' + x + "</div>").join("") + "</div></div>";
+  }).join("");
 }
 let boardReturn = "home";
 function renderBoard(){
@@ -1131,8 +1158,11 @@ document.addEventListener("click", e => {
     const s = $("#sticker"); if (s.classList.contains("flip")) return;
     s.classList.add("flip"); sfx.win();
     const isNew = s.dataset.new === "1";
-    $("#stickerTxt").textContent = isNew ? "A new sticker for your book!" : "Another one of these!";
-    speak(isNew ? "A new sticker for your book!" : "Another one of these!");
+    const pgName = s.dataset.page;
+    const msg = pgName ? "You finished the " + pgName + " page! 3 bonus stars!" : isNew ? "A new sticker for your book!" : "Another one of these!";
+    $("#stickerTxt").textContent = msg;
+    if (pgName){ confetti(220); $("#resBanner").innerHTML += '<div class="banner" style="background:var(--purple)">📒 Page complete! +3 ⭐</div>'; }
+    speak(msg);
     return;
   }
   if (t.closest("#muteBtn")){ muted = !muted; lsSet(LS_MUTE, muted ? "1" : null); if (muted) stopSpeech(); renderHome(); return; }
